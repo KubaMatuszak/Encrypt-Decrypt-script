@@ -6,7 +6,7 @@ class FileMan:
         self.root = tk.Tk()
         self.root.withdraw()
 
-    def file_loader(self):
+    def file_load(self):
         file_path = filedialog.askopenfilename(
             title="Select a Text File",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
@@ -22,7 +22,7 @@ class FileMan:
         else:
             print("No file selected.")
 
-    def file_saver(self, txt):
+    def file_save(self, txt):
         file_path = filedialog.asksaveasfilename(
             title="Save Text File",
             defaultextension=".txt",  # Default extension

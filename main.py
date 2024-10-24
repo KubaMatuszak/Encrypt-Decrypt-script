@@ -1,89 +1,42 @@
-import tkinter as tk
-from tkinter import filedialog
+from Utils.encdec_handler import EncDec
+from Utils.file_management import FileMan
+from Utils.Sql_handler import SqlHandler
+file_dialog = FileMan()
+cesar = EncDec()
 
-# Dict to map letters with numbers
-lowercase_dict = {chr(i): i - 97 for i in range(97, 123)}
-uppercase_dict = {chr(i): i - 65 for i in range(65, 91)}
+print("Chcesz zakodować czy odkodować plik?")
+action = input()
+if action=='zakodować':
 
-# Dicts to map numbers to letters again :)
-reverse_lowercase_dict = {v: k for k, v in lowercase_dict.items()}
-reverse_uppercase_dict = {v: k for k, v in uppercase_dict.items()}
+    print('Wybierz plik do zakodowania...')
+    file = file_dialog.file_load()
 
-root = tk.Tk()
-root.withdraw()
+    print('O ile przesunąć litery w pliku?')
+    num = int(input())
+    coded_file = cesar.cesar_encrypt(file,num)
 
-def file_loader():
-    file_path = filedialog.askopenfilename(
-        title="Select a Text File",
-        filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
-    )
+    print('Gdzie zapisać plik: SQL/Dysk')
+    save_action = input()
+    if save_action == 'SQL':
+        sql = SqlHandler('DB_SERVER_NAME','DB_NAME')
+        sql.write(coded_file)
 
-    if file_path:
-        print(f"Selected file: {file_path}")
-
-        with open(file_path, 'r', encoding='utf-8') as file:
-            text = file.read()
-            return text
-
+    elif save_action == 'Dysk':
+        print('Wybierz miejsce zapisu')
+        file_dialog.file_save(coded_file)
     else:
-        print("No file selected.")
+        print("Błąd składni :/")
 
+elif action == 'odkodować':
 
-## ENCRYPTING SECTION !!!
-def cesar_encrypt(text, num):
-    coded_string = ''
-    for c in text:
-        if c.isupper():
-            # Mapping shifted value back to letter and adding it to a new string
-            shifted_value = (uppercase_dict[c] + num) % 26
-            coded_string += reverse_uppercase_dict[shifted_value]
-        elif c.islower():
-            # Mapping shifted value back to letter and adding it to a new string
-            shifted_value = (lowercase_dict[c] + num) % 26
-            coded_string += reverse_lowercase_dict[shifted_value]
-        else:
-            # Keep non-alphabetic characters unchanged
-            coded_string += c
+    print('Wybierz plik do odkodowania...')
+    file = file_dialog.file_load()
 
-    return coded_string
+    print('O ile przesunąłeś litery w pliku?')
+    num = int(input())
+    coded_file = cesar.cesar_decrypt(file, num)
 
-## DECRYPTING SECTION ( TO DO )
-def cesar_decrypt(text, num):
-    coded_string = ''
-    for c in text:
-        if c.isupper():
-            # Mapping shifted value back to letter and adding it to a new string
-            shifted_value = (uppercase_dict[c] - num) % 26
-            coded_string += reverse_uppercase_dict[shifted_value]
-        elif c.islower():
-            # Mapping shifted value back to letter and adding it to a new string
-            shifted_value = (lowercase_dict[c] - num) % 26
-            coded_string += reverse_lowercase_dict[shifted_value]
-        else:
-            # Keep non-alphabetic characters unchanged
-            coded_string += c
-
-    return coded_string
-def file_saver(txt):
-    file_path = filedialog.asksaveasfilename(
-        title="Save Text File",
-        defaultextension=".txt",  # Default extension
-        filetypes=[("Text files", "*.txt"), ("All files", "*.*")]  # File types
-    )
-
-    # Check if a file was selected
-    if file_path:
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(txt)  # Write the string to the file
-        print(f"File saved as: {file_path}")
-    else:
-        print("Save operation was cancelled.")
-
-
-print('Podaj liczbę znaków, o które mam przesunąć tekst')
-num = int(input())
-print('Wybierz plik txt do wczytania')
-txt_to_save = cesar_encrypt(file_loader(), num)
-print('Wybierz gdzie zapisać zaszyfrowany plik')
-file_saver(txt_to_save)
-
+    print('Gdzie zapisać odkodowany plik?')
+    file_dialog.file_save(coded_file)
+else:
+    print('Błąd składni :/ ')
